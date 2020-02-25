@@ -4,15 +4,95 @@ import serial
 import atexit
 import map
 
+# ============TODO===============
+
+""" 
+Turn the sonars into classes? Probably allows for modular user of them.
+
+Move the configurations to human readable configuration files that can be changed.
+
+Document code -in progress-
+
+Create log files and a logging system instead of outputting to console
+
+"""
+
+# ===============================Raspi Configuration=====================================
+'''
+    This is the setup that is required in order to communicate and retieve
+    information from the sonar device.
+
+    Used Imports: 
+    import RPi.GPIO as GPIO
+'''
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+# Values may change accoridng to the ports available on the PI
+# This can be moved to a configuration file to be edited
+TRIG1 = 23
+ECHO1 = 24
+SIG1 = 18
+WARN = 25
+TRIG2 = 17
+ECHO2 = 27
+SIG2 = 18
+
+
+GPIO.setup(SIG1, GPIO.OUT)
+GPIO.setup(TRIG1,GPIO.OUT)
+GPIO.setup(ECHO1,GPIO.IN)
+GPIO.setup(WARN, GPIO.IN)
+
+GPIO.output(SIG1, True)
+
+
+GPIO.setup(SIG2, GPIO.OUT)
+GPIO.setup(TRIG2,GPIO.OUT)
+GPIO.setup(ECHO2,GPIO.IN)
+
+GPIO.output(SIG1, True)
+#===============================================================================================
+
+
+#========================================Serial Interface Configuration============================================
+
+'''
+    This creates the object ser which is the means of trasmission between 
+    the raspberry pi and the controller.
+'''
+
+ser = serial.Serial(
+    port = '/dev/serial0',
+    baudrate = 115200,
+    parity = serial.PARITY_NONE,
+    stopbits = serial.STOPBITS_ONE,
+    bytesize = serial.EIGHTBITS,
+    timeout = 1
+    )
+#===============================================================================================
+
+#========================================Functions============================================
+
+# This is used to create a copy of the "map" which contains all the locations the robot can go to
 locations = map.map
 
+
+
 def nextHop(current_position): 
+    """ 
+    This function is meant to pull the location of the next location in the 'map'
+    """
     next_hop = current_position['nextHop']
     return next_hop
     
-def getDistance1():
 
-    # Send ping
+def getDistance1():
+    """ 
+    This function returns the distance using sonar
+    """
+
+    # Send ping WHY IS THIS NOT A FUNCTION!?!?
 #print('sending ping')
     GPIO.output(TRIG1, False)
     time.sleep(.0001)
@@ -35,20 +115,11 @@ def getDistance1():
     
     return distance
 
-def getLocation(port):
-	
-        flush = port.read(100)
-        command = b'?C 1_'
-        port.write(command)
-        
-        message = port.read(100)
-        print(message)
-        message = message[7:-1].decode('ascii')
-        print(message)
-        message = int(message)
-        return message
-	
 def getDistance2():
+
+    """ 
+    This function returns the distance using sonar
+    """
 
     # Send ping
    # print('starting ping')
@@ -74,8 +145,26 @@ def getDistance2():
     return distance
        
 
+def getLocation(port):
+    """ 
+    This function returns the distance stored within the robot/controller
+    """
+
+    flush = port.read(100)
+    command = b'?C 1_'
+    port.write(command)
+    
+    message = port.read(100)
+    print(message)
+    message = message[7:-1].decode('ascii')
+    print(message)
+    message = int(message)
+    return message
+
+
 def startup(port, locations):
     '''
+    input description
     Values = [Threshold, minimum, max,current_location , next hop distance]
     '''
     values = []
@@ -141,6 +230,7 @@ def viewFront(port):
     
 def wallFollow(port, values):
     '''
+    Adjust the speed of the wheel according to the distace from the wall
     Values = [Threshold, minimum, max,current_location , next hop distance]
     '''
     values[3] = getLocation(port)
@@ -170,6 +260,11 @@ def wallFollow(port, values):
     time.sleep(5)
     
 def robotAlign(port):
+    
+    '''
+    Stops the robot and re-aligns it when it's too close the wall
+    Values = [Threshold, minimum, max,current_location , next hop distance]
+    '''
     
     print("Starting Alignment")
     command = '!S 1 0_!S 2 0_'.encode('utf-8')
@@ -227,67 +322,22 @@ def robotAlign(port):
             time.sleep(1)
             command = '!S 1 0_!S 2 0_'.encode('utf-8')
             port.write(command)
-    
-    
-
-    
-
 
 def STOP(port):
     print('Stopping')
     STOPMOVE = '!S 1 0_!S 2 0_'.encode('utf-8')
     port.write(STOPMOVE)
 
-'''
-    This creates the object ser which is the means of trasmission between 
-    the raspberry pi and the controller.
-'''
-
-ser = serial.Serial(
-    port = '/dev/serial0',
-    baudrate = 115200,
-    parity = serial.PARITY_NONE,
-    stopbits = serial.STOPBITS_ONE,
-    bytesize = serial.EIGHTBITS,
-    timeout = 1
-    )
-
-'''
-    This is the setup that is required in order to communicate and retieve
-    information from the sonar device.
-'''
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-# Values may change accoridng to the ports available on the PI
-TRIG1 = 23
-ECHO1 = 24
-SIG1 = 18
-WARN = 25
-
-GPIO.setup(SIG1, GPIO.OUT)
-GPIO.setup(TRIG1,GPIO.OUT)
-GPIO.setup(ECHO1,GPIO.IN)
-GPIO.setup(WARN, GPIO.IN)
-
-GPIO.output(SIG1, True)
-
-TRIG2 = 17
-ECHO2 = 27
-SIG2 = 18
-
-GPIO.setup(SIG2, GPIO.OUT)
-GPIO.setup(TRIG2,GPIO.OUT)
-GPIO.setup(ECHO2,GPIO.IN)
-
-GPIO.output(SIG1, True)
-
+# ==============================Main program==============================================
+""" Init """
 print('starting programs')
 #values = startup()
 #wallFollow(ser, values)
 #start-position = start()
 values = startup(ser, locations)
 current_pos = locations[1]
+
+
 try: 
 	
 	#STARTMOVE = '!S 1 1000_!S 2 {}_'.format(500).encode('utf-8')
