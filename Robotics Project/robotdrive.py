@@ -7,9 +7,11 @@ import map
 # ============TODO===============
 
 """ 
-Turn the sonars into classes? Probably allows for modular user of them.
 
-Move the configurations to human readable configuration files that can be changed.
+
+Move the configurations to human readable configuration files that can be changed. DONE
+
+Turn the sonars into classes? Probably allows for modular user of them.
 
 Document code -in progress-
 

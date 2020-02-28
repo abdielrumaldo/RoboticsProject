@@ -15,10 +15,10 @@ print (os.getcwd())
 '''
 # Values may change accoridng to the ports available on the PI
 # This can be moved to a configuration file to be edited
-with open ('/mnt/c/Users/7h3un/Documents/robotics-project/RoboticsProject/Main/config.json') as configurationFile:
+with open ('config.json') as configurationFile:
     data = json.load(configurationFile)
     for p in data["config"]:
-        print(p)
+        print("Config: {}".format(p))
 #config = 
 
 
