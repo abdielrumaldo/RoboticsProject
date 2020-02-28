@@ -15,6 +15,8 @@ Document code -in progress-
 
 Create log files and a logging system instead of outputting to console
 
+add a naming scheme
+
 """
 
 # ===============================Raspi Configuration=====================================
@@ -93,7 +95,8 @@ def getDistance1():
     """
 
     # Send ping WHY IS THIS NOT A FUNCTION!?!?
-#print('sending ping')
+
+    #print('sending ping')
     GPIO.output(TRIG1, False)
     time.sleep(.0001)
     GPIO.output(TRIG1, True)
@@ -121,7 +124,7 @@ def getDistance2():
     This function returns the distance using sonar
     """
 
-    # Send ping
+    # Send ping AGAIN WHY IS THIS NOT A FUNCTION
    # print('starting ping')
     GPIO.output(TRIG2, False)
     time.sleep(.0001)
@@ -243,7 +246,6 @@ def wallFollow(port, values):
 
         backReading = getDistance1()
         frontReading = getDistance2()
-
         if frontReading > backReading:
             delta = frontReading - backReading
         
