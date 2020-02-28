@@ -1,5 +1,5 @@
 # ===============================Raspi Configuration=====================================
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import json
 import os
 print (os.getcwd())
