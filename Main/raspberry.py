@@ -1,4 +1,3 @@
-# ===============================Raspi Configuration=====================================
 #import RPi.GPIO as GPIO
 import json
 
@@ -14,29 +13,30 @@ import json
 
     Config File Format:
 
-    {
-    "config": [
         {
-        "TRIG1" : 23,
-        "ECHO1" : 24,
-        "SIG1" : 18,
-        "WARN" : 25,
-        "TRIG2" : 17,
-        "ECHO2" : 27,
-        "SIG2" : 18
+        "config": [
+            {
+            "TRIG1" : 23,
+            "ECHO1" : 24,
+            "SIG1" : 18,
+            "WARN" : 25,
+            "TRIG2" : 17,
+            "ECHO2" : 27,
+            "SIG2" : 18
+            }
+        ]
         }
-    ]
-    }
+
+    # Values may change accoridng to the ports available on the PI
+    # Sonar1 = Sonar('location of configuration JSON')
 
 '''
-# Values may change accoridng to the ports available on the PI
-# Reads configuration form the config.json file
-#===============================================================================================
+
 
 class Sonar:
     def __init__(self, fileName):
         """
-        Initialize the python pins for raspi sonar from the config.json
+        Initialize the PINs RPi.GPIO for raspi sonar from a JSON [fileName]
         """
         with open (fileName) as configjson:
             data = json.load(configjson)
@@ -63,6 +63,9 @@ class Sonar:
 
         
     def printConfig(self):
+        '''
+        Prints the current PIN configuration for the sonar
+        '''
 
         print("PrintingConfiguration file")
 
@@ -70,21 +73,23 @@ class Sonar:
             print("{} : {}".format(key, value))
 
     def getDistance(self):
-
+        '''
+        Returns the distance between the sonar and the closest object in CM
+        '''
         # Send ping
         #print('sending ping')
-        GPIO.output(TRIG1, False)
+        GPIO.output(config['TRIG1'], False)
         time.sleep(.0001)
-        GPIO.output(TRIG1, True)
+        GPIO.output(config['TRIG1'], True)
         time.sleep(.00001)
-        GPIO.output(TRIG1, False)
+        GPIO.output(config['TRIG1'], False)
 
         #print('Getting Ping')
         # Get the time between pings
-        while GPIO.input(ECHO1) == 0:
+        while GPIO.input(config['ECHO1']) == 0:
             pulse_start = time.time()
 
-        while GPIO.input(ECHO1) == 1:
+        while GPIO.input(config['ECHO1']) == 1:
             pulse_end = time.time()
 
         pulse_duration = pulse_end - pulse_start
@@ -96,7 +101,7 @@ class Sonar:
 
     def viewFront(self, port):
         '''
-        See if the front is blocked
+        Returns True if there is something in front of the sonar
         '''
             
         while GPIO.input(25) == 0:
