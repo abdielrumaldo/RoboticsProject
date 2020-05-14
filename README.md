@@ -1,4 +1,4 @@
-# RoboticsProject
+# Autonomous System: A Robotics Projects
 
 This project was originally created for the purpose of completing a project in order to graduate. 
 This put us in a time crunch while trying to create a functional robot with a handful of features. Most 
